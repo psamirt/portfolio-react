@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const Contact = (): JSX.Element => {
 	const [formData, setFormData] = useState({
@@ -7,6 +8,8 @@ const Contact = (): JSX.Element => {
 		email: '',
 		message: '',
 	})
+
+	const [disable, setDisable] = useState(true)
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -16,18 +19,32 @@ const Contact = (): JSX.Element => {
 			...formData,
 			[name]: value,
 		})
+		setDisable(
+			formData.name === '' || formData.email === '' || formData.message === '',
+		)
 	}
-  
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:3000/send', formData);
-      console.log('Respuesta del servidor', response.data);
-    } catch (error) {
-      console.error('Error al enviar el formulario', error);
-    }
-  };
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+		try {
+			const response = await axios.post('http://localhost:3000/send', formData)
+			console.log('Respuesta del servidor', response.data)
+			Swal.fire({
+				title: 'Gracias',
+				text: 'Me comunicare a tu correo cuando lea el mensaje',
+				icon: 'success',
+				confirmButtonText: 'Aceptar',
+			})
+		} catch (error) {
+			console.error('Error al enviar el formulario', error)
+			Swal.fire({
+				title: 'Error con el servidor',
+				text: 'Puedes enviarme un correo a p_samir@hotmail.com',
+				icon: 'error',
+				confirmButtonText: 'Aceptar',
+			})
+		}
+	}
 
 	return (
 		<div className='py-8'>
@@ -47,7 +64,7 @@ const Contact = (): JSX.Element => {
 							name='name'
 							value={formData.name}
 							onChange={handleChange}
-							className='w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
+							className='w-full px-4 py-2 mt-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
 						/>
 					</div>
 					<div className='mb-4'>
@@ -60,7 +77,7 @@ const Contact = (): JSX.Element => {
 							name='email'
 							value={formData.email}
 							onChange={handleChange}
-							className='w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
+							className='w-full px-4 py-2 mt-2 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
 						/>
 					</div>
 					<div className='mb-4'>
@@ -79,7 +96,12 @@ const Contact = (): JSX.Element => {
 					</div>
 					<button
 						type='submit'
-						className='w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none'
+						className={`w-full px-4 py-2 text-white rounded-md focus:outline-none ${
+							disable
+								? 'bg-gray-300 cursor-not-allowed'
+								: 'bg-blue-500 hover:bg-blue-600'
+						}`}
+						disabled={disable}
 					>
 						Enviar
 					</button>
